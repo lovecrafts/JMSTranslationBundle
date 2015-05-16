@@ -223,17 +223,25 @@ class Message
             throw new RuntimeException(sprintf('You can only merge messages with the same id. Expected id "%s", but got "%s".', $this->id, $message->getId()));
         }
 
+        $this->new = $message->isNew();
+
         if (null !== $meaning = $message->getMeaning()) {
             $this->meaning = $meaning;
         }
 
-        if (null !== $desc = $message->getDesc()) {
-            $this->desc = $desc;
-        }
-
-        $this->new = $message->isNew();
         if ($localeString = $message->getLocaleString()) {
             $this->localeString = $localeString;
+        }
+
+        if (!$this->desc) {
+            $this->desc = $message->getDesc();
+        } elseif ($this->desc != $message->getDesc()) {
+            if ($this->desc != $message->getLocaleString()) {
+                $this->new = true;
+            }
+            if ($message->getDesc() == $message->getLocaleString()) {
+                $this->localeString = $this->desc;
+            }
         }
     }
 
